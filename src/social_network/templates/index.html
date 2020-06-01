@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Index{% endblock %}
+
+{% block content %}
+<h1>Test task for StarNavi</h1>
+
+{% if request.user.is_authenticated %}
+<p>
+    <a href="{% url 'logout' %}">
+        <button>LogOut</button>
+    </a>
+</p>
+<p>
+    <a href="{% url 'newpost' %}">
+        <button>Create Post</button>
+    </a>
+</p>
+{% else %}
+<p>
+    <a href="{% url 'signup' %}">
+        <button>SignUp</button>
+    </a>
+</p>
+<p>
+    <a href="{% url 'login' %}">
+        <button>LogIn</button>
+    </a>
+</p>
+{% endif %}
+{% endblock %}
