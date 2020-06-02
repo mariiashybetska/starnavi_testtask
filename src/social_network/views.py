@@ -1,10 +1,15 @@
-from django.shortcuts import render
+import json
+
 from django.views.generic.edit import CreateView
+from django.views.generic.list import ListView
 from django.urls import reverse_lazy
-from django.shortcuts import redirect
+from django.http import HttpResponse
+from django.views import View
+from django.contrib.contenttypes.models import ContentType
+
 
 from social_network.forms import SignUpForm
-from social_network.models import User, Post
+from social_network.models import User, Post, LikeDislike
 
 
 class SignUpView(CreateView):
@@ -16,17 +21,60 @@ class SignUpView(CreateView):
 
 class CreatePostView(CreateView):
     template_name = 'post_form.html'
+    # form = PostForm
+    fields = ('title', 'text', )
     model = Post
-    fields = ('title', 'text')
     success_url = reverse_lazy('index')
 
     def form_valid(self, form):
         post = form.save(commit=False)
-        post.title = form.instance.title
-        post.text = form.instance.text
-        post.author = self.request.user.id
+        post.author = self.request.user
         post.save()
-        return self.form_valid()
+        return super().form_valid(form)
+
+
+class VotesView(View):
+    model = Post  # Data Model - Articles or Comments
+    vote_type = None  # Vote type Like/Dislike
+
+    def post(self, request, pk):
+        obj = self.model.objects.get(pk=pk)
+        # GenericForeignKey does not support get_or_create
+        try:
+            likedislike = LikeDislike.objects.get(content_type=ContentType.objects.get_for_model(obj), object_id=obj.id,
+                                                  user=request.user)
+            if likedislike.vote is not self.vote_type:
+                likedislike.vote = self.vote_type
+                likedislike.save(update_fields=['vote'])
+                result = True
+            else:
+                likedislike.delete()
+                result = False
+        except LikeDislike.DoesNotExist:
+            obj.votes.create(user=request.user, vote=self.vote_type)
+            result = True
+
+        return HttpResponse(
+            json.dumps({
+                "result": result,
+                "like_count": obj.votes.likes().count(),
+                "dislike_count": obj.votes.dislikes().count(),
+                "sum_rating": obj.votes.sum_rating()
+            }),
+            content_type="application/json"
+        )
+
+
+class PostsView(ListView):
+    model = Post
+    template_name = 'posts.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+
 
 
 

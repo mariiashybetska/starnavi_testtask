@@ -18,3 +18,4 @@ class SignUpForm(ModelForm):
             if cleaned_data['password'] != cleaned_data['confirm_password']:
                 raise forms.ValidationError('Passwords do not match!')
         return cleaned_data
+
