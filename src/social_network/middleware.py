@@ -13,5 +13,4 @@ class LoggerMiddleware:
             Logger.objects.create(
                 user=request.user
             )
-
         return response

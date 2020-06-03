@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django import forms
 
-from social_network.models import User, Post
+from social_network.models import User
 
 
 class SignUpForm(ModelForm):

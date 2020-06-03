@@ -7,7 +7,6 @@ from django.http import HttpResponse
 from django.views import View
 from django.contrib.contenttypes.models import ContentType
 
-
 from social_network.forms import SignUpForm
 from social_network.models import User, Post, LikeDislike
 
@@ -21,7 +20,6 @@ class SignUpView(CreateView):
 
 class CreatePostView(CreateView):
     template_name = 'post_form.html'
-    # form = PostForm
     fields = ('title', 'text', )
     model = Post
     success_url = reverse_lazy('index')
@@ -34,8 +32,8 @@ class CreatePostView(CreateView):
 
 
 class VotesView(View):
-    model = Post  # Data Model - Articles or Comments
-    vote_type = None  # Vote type Like/Dislike
+    model = Post
+    vote_type = None
 
     def post(self, request, pk):
         obj = self.model.objects.get(pk=pk)
